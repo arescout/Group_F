@@ -1,20 +1,32 @@
 # File containing client classes
-# Imports
+# Imports of external packages
 import socket
 
+# Class for handling everyting on the client side
 class Client():
     def __init__(self,serverAddress, serverPort):
-        s = socket.socket()
-        s.connect((socket.gethostname(),serverPort))
+        # Set how many bytes to accept from a socket
+        self.bufferSize = 4096
+        # Inititate a Socket
+        self.s = socket.socket()
+        # Connect to a socket with a given address and port
+        # For now it's localhost per default
+        self.s.connect((socket.gethostname(),serverPort))
+        # Receive a file that is sent instantly from the server
+        self.receiveFile(self.s,'testReceive.txt')
 
         return
 
-
-    def initiateSocket(serverAddress, serverPort):
-        socket = socket.socket()
-        socket.connect((serverAddress,serverPort))
-        return(socket)
-
+    # Function for receiving a file from a socket
+    # This function assumes that all data is sent in one transmission, ie the file isn't bigger than bufferSize
+    def receiveFile(self, socket, filePath):
+        # Open or create a file at the given address
+        with open(filePath, "wb") as f:
+            # Receive data from the socket
+            bytesRead = socket.recv(self.bufferSize)
+            # Write the data to the file
+            f.write(bytesRead)
+        return True
 
 def main():
     client = Client('127.0.0.1', 1234)
