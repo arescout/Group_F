@@ -13,9 +13,19 @@ class Client():
         # For now it's localhost per default
         self.s.connect((socket.gethostname(),serverPort))
         # Receive a file that is sent instantly from the server
-        self.receiveFile(self.s,'testReceive.txt')
-
-        return
+        #self.receiveFile(self.s,'testReceive.txt')
+        self.s.send(f"Hello".encode('ascii'))
+        while True:
+            data = self.s.recv(1024)
+            print("Recieved from server", str(data.decode('ascii')))
+            ans = input("Do you want to send a message?")
+            if ans == 'y':
+                msg = input("Insert Message:")
+                self.s.send(msg.encode('ascii'))
+                continue
+            else:
+                break
+        self.s.close()
 
     # Function for receiving a file from a socket
     # This function assumes that all data is sent in one transmission, ie the file isn't bigger than bufferSize
