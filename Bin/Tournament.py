@@ -8,6 +8,8 @@ class Tournament():
         self.scores = {}
         # Dict for storing player names and addresses
         self.players = {}
+        # Int for keeping track of number of games
+        self.gamesPlayed = 0
 
 
         ### read game history from server (such as last move made) from txt file
@@ -98,8 +100,21 @@ class Tournament():
         elif fileContent['gamescore'] == 0:
             self.scores[fileContent['fplayer']] += self.settings['draw']
             self.scores[fileContent['tplayer']] += self.settings['draw']
+        self.gamesPlayed += 1
         # Return true
         return(True)
+
+    def generateSortedScores(self):
+        return(dict(sorted(self.scores.items(), key=lambda item: item[1])))
+
+    def generateTournamentFile(self, filePath):
+        sortedScores = self.generateSortedScores()
+        with open(filePath, 'w+') as f:
+            f.write(f'GAMESPLAYED: {self.gamesPlayed}\n')
+            for player, score in sortedScores.items():
+                f.write(f'PLAYERSCORE: {player} {score}\n')
+        return True
+
 
 def main():
 
@@ -107,7 +122,14 @@ def main():
 
     ### prompt players to initiate game
     tournament = Tournament()
-
+    tournament.addPlayer('Player1',1234)
+    tournament.addPlayer('Player2', 1235)
+    tournament.addPlayer('Player3', 1236)
+    print(tournament.players)
+    tournament.handleGameFile('testGameFile.txt')
+    tournament.handleGameFile('testGameFile0.txt')
+    print(tournament.scores)
+    tournament.generateTournamentFile('testTournamentFile.txt')
     # store the results in the tournament data in local variable
     # tournament_data += tournament
     # send out tournamnet data
