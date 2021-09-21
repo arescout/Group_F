@@ -8,6 +8,8 @@ class Tournament():
         self.scores = {}
         # Dict for storing player names and addresses
         self.players = {}
+        # Dict for keeping game history
+        self.history = {}
         # Int for keeping track of number of games
         self.gamesPlayed = 0
 
@@ -89,18 +91,31 @@ class Tournament():
         # If game is still active, return false (no action required)
         if fileContent['gamedone'] != True:
             return(False)
+        # Add one to games played
+        self.gamesPlayed += 1
+        self.history.update({self.gamesPlayed: {
+        "players": [fileContent['fplayer'], fileContent['tplayer']],
+        "score": fileContent['gamescore']
+        }})
         # If game is over and final score is greater than zero, add one point to sending player's score
+        # Also update game history
         if fileContent['gamescore'] > 0:
             self.scores[fileContent['fplayer']] += self.settings['win']
             self.scores[fileContent['tplayer']] += self.settings['loss']
+
+            self.history[self.gamesPlayed].update({'winner': fileContent['fplayer']})
         # If final score is lower than zero, add one point to receiving player's score
         elif fileContent['gamescore'] < 0:
             self.scores[fileContent['tplayer']] += self.settings['win']
             self.scores[fileContent['fplayer']] += self.settings['loss']
+
+            self.history[self.gamesPlayed].update({'winner': fileContent['tplayer']})
         elif fileContent['gamescore'] == 0:
             self.scores[fileContent['fplayer']] += self.settings['draw']
             self.scores[fileContent['tplayer']] += self.settings['draw']
-        self.gamesPlayed += 1
+
+            self.history[self.gamesPlayed].update({'winner': 'draw'})
+
         # Return true
         return(True)
 
@@ -143,6 +158,7 @@ def main():
     tournament.handleGameFile('testGameFile.txt')
     tournament.handleGameFile('testGameFile0.txt')
     print(tournament.scores)
+    print(tournament.history)
     tournament.generateTournamentFile('testTournamentFile.txt')
     # store the results in the tournament data in local variable
     # tournament_data += tournament
