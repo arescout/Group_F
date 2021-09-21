@@ -58,14 +58,20 @@ class Tournament():
         # Return dict
         return(content)
 
+    # Function for handling content of a game file sent between active players
     def handleGameFile(self, filePath):
+        # Extract the relevant content without altering the file
         fileContent = self.readGameFile(filePath)
+        # If game is still active, return false (no action required)
         if fileContent['gamedone'] != True:
             return(False)
+        # If game is over and final score is greater than zero, add one point to sending player's score
         if fileContent['gamescore'] > 0:
             self.scores[fileContent['fplayer']] += 1
+        # If final score is lower than zero, add one point to receiving player's score
         elif fileContent['gamescore'] < 0:
             self.scores[fileContent['tplayer']] += 1
+        # Return true
         return(True)
 
 def main():
@@ -74,9 +80,7 @@ def main():
 
     ### prompt players to initiate game
     tournament = Tournament()
-    print(tournament.scores)
     tournament.handleGameFile('testGameFile.txt')
-    print(tournament.scores)
     # store the results in the tournament data in local variable
     # tournament_data += tournament
     # send out tournamnet data

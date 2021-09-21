@@ -4,7 +4,3 @@ FPLAYER: Player2
 GAMESCORE: -5
 TEST1: 213
 TEST2:
-
-move herea
-
-yalla!!!
