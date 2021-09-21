@@ -1,5 +1,9 @@
-# Server containing Tournament classes
+# File containing Tournament classes
 
+# Imports
+import random
+
+# Torunament class
 class Tournament():
     def __init__(self, win=3, draw=1, loss=0):
         # Dict for storing settings
@@ -8,11 +12,16 @@ class Tournament():
         self.scores = {}
         # Dict for storing player names and addresses
         self.players = {}
+        # Dict for keeping matchup history
+        self.matchups = {}
+        # Dict for keeping colouring history
+        self.colours = {}
         # Dict for keeping game history
         self.history = {}
         # Int for keeping track of number of games
         self.gamesPlayed = 0
-
+        # Boolean for keeping track of first game
+        self.firstGame = True
 
         ### read game history from server (such as last move made) from txt file
 
@@ -40,6 +49,8 @@ class Tournament():
             playerName = playerName + str(len(self.players))
         # If new, add player to dict
         self.players.update({playerName: playerAddress})
+        self.matchups.update({playerName: []})
+        self.colours.update({playerName: []})
         self.scores.update({playerName: 0})
         return(True)
 
@@ -119,29 +130,105 @@ class Tournament():
         # Return true
         return(True)
 
+    # Function for generating a sorted scoreboard dict
     def generateSortedScores(self):
         return(dict(sorted(self.scores.items(), key=lambda item: item[1])))
 
+    def generateNextMatchup(self):
+        # Initiate list for keeping track of candidates checked
+        checkedP1 = []
+        checkedP2 = []
+        # Initiate booleans for loops
+        newP1 = True
+        newP2 = True
+
+        while newP1:
+            # Generate a random p1
+            p1 = random.choice(list(self.players.keys()))
+            # Add p1 to list of checked
+            if p1 not in checkedP1:
+                checkedP1.append(p1)
+                # If all players has been checked, tournament is over
+                if len(checkedP1)==len(self.players.keys()):
+                    return(False)
+            print('Player1:', p1)
+            # Assume p1 is valid
+            newP1 = False
+            # Check if p1 has any new matchups
+            if len(self.matchups[p1]) >= len(self.players.items())-1:
+                # If not, find a new p1
+                newP1 = True
+
+        while newP2:
+            # Generate a random p2
+            p2 = random.choice(list(self.players.keys()))
+            # Add to list of checked if not already there
+            if p2 not in checkedP2:
+                checkedP2.append(p2)
+                # Check if all players has been checked for player2
+                if len(checkedP2) == len(self.players.keys()):
+                    print('ERROR: In generateNextMatchup - All players checked for player 2, this shouldnt happen')
+                    return(False)
+            print('Player2', p2)
+            # Assume p2 is valid
+            newP2 = False
+            # Check if p2 is the same as p1
+            if p2 == p1:
+                newP2 = True
+            # Check if p2 already met p1
+            if p2 in self.matchups[p1]:
+                newP2 = True
+            # Check if p2 has any matchups left
+            if len(self.matchups[p2]) >= len(self.players.items())-1:
+                newP2 = True
+        return({'player1':p1, 'player2':p2})
+
+    # Function for generating data about the next game to be sent to the players
     def generateNextGameData(self):
-        # This is just a placeholder
-        nextGame = {'player1':'Player1', 'player1Colour': 'B', 'player2':'Player2', 'player2Colour': "W"}
+        if self.firstGame:
+            player1 = random.choice(list(self.players.keys()))
+            player2 = random.choice(list(self.players.keys()))
+            while player2 == player1:
+                player2 = random.choice(list(self.players.keys()))
+            nextGame = {'player1':player1, 'player1Colour': 'B', 'player2':player2, 'player2Colour': "W"}
+            self.colours[nextGame['player1']].append(nextGame['player1Colour'])
+            self.colours[nextGame['player2']].append(nextGame['player2Colour'])
+            self.firstGame = False
+            return(nextGame)
+        nextGame = self.generateNextMatchup()
+        # Generate placeholder colours
+        nextGame.update({'player1Colour':'B', 'player2Colour': 'W'})
+        self.colours[nextGame['player1']].append(nextGame['player1Colour'])
+        self.colours[nextGame['player2']].append(nextGame['player2Colour'])
         return(nextGame)
 
+    # Function for generating the tournament data file sent to the players
     def generateTournamentFile(self, filePath):
+        # Get the sorted scoreboard
         sortedScores = self.generateSortedScores()
+        # Generate data about next game
         nextGame = self.generateNextGameData()
-        print(nextGame)
+        # Open a writable file
         with open(filePath, 'w+') as f:
+            # Add how many games has been played
             f.write(f'GAMESPLAYED: {self.gamesPlayed}\n')
+            # Iterate over each player in the dict with sorted scores
             for player, score in sortedScores.items():
+                # Add them in order to the file, one line per player
                 f.write(f'PLAYERSCORE: {player} {score}\n')
+            # Add next players tag
             f.write('NEXTPLAYERS: ')
+            # Iterate over all key-value pairs in the nextgame dict
             for key, val  in nextGame.items():
+                # If the colour field, add the colour to the player
                 if 'Colour' in key:
                     f.write(val+' ')
+                # If not colour field, it's the player field. Add the player
                 else:
                     f.write(val+':')
+            # Finish next player with a newline
             f.write('\n')
+        # Close the file and exit function
         return(True)
 
 
@@ -155,11 +242,12 @@ def main():
     tournament.addPlayer('Player2', 1235)
     tournament.addPlayer('Player3', 1236)
     print(tournament.players)
+    tournament.generateTournamentFile('testTournamentFile.txt')
     tournament.handleGameFile('testGameFile.txt')
     tournament.handleGameFile('testGameFile0.txt')
     print(tournament.scores)
     print(tournament.history)
-    tournament.generateTournamentFile('testTournamentFile.txt')
+    tournament.generateTournamentFile('testTournamentFile0.txt')
     # store the results in the tournament data in local variable
     # tournament_data += tournament
     # send out tournamnet data
