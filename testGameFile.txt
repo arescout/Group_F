@@ -1,0 +1,10 @@
+GAMEDONE: 0
+TPLAYER: Player1
+FPLAYER: Player2
+GAMESCORE: -5
+TEST1: 213
+TEST2:
+
+move herea
+
+yalla!!!
