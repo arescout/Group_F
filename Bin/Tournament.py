@@ -107,13 +107,27 @@ class Tournament():
     def generateSortedScores(self):
         return(dict(sorted(self.scores.items(), key=lambda item: item[1])))
 
+    def generateNextGameData(self):
+        # This is just a placeholder
+        nextGame = {'player1':'Player1', 'player1Colour': 'B', 'player2':'Player2', 'player2Colour': "W"}
+        return(nextGame)
+
     def generateTournamentFile(self, filePath):
         sortedScores = self.generateSortedScores()
+        nextGame = self.generateNextGameData()
+        print(nextGame)
         with open(filePath, 'w+') as f:
             f.write(f'GAMESPLAYED: {self.gamesPlayed}\n')
             for player, score in sortedScores.items():
                 f.write(f'PLAYERSCORE: {player} {score}\n')
-        return True
+            f.write('NEXTPLAYERS: ')
+            for key, val  in nextGame.items():
+                if 'Colour' in key:
+                    f.write(val+' ')
+                else:
+                    f.write(val+':')
+            f.write('\n')
+        return(True)
 
 
 def main():
