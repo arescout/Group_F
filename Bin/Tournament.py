@@ -2,8 +2,12 @@
 
 class Tournament():
     def __init__(self, win=3, draw=1, loss=0):
+        # Dict for storing settings
         self.settings = {"win": int(win), "draw": int(draw), "loss": int(loss)}
+        # Dict for storing player scores
         self.scores = {}
+        # Dict for storing player names and addresses
+        self.players = {}
 
 
         ### read game history from server (such as last move made) from txt file
@@ -17,6 +21,23 @@ class Tournament():
             # let everyone know that game is over and the results
             # return
         return
+
+    # Function for adding a player to the tournament
+    def addPlayer(self, playerName, playerAddress):
+        # Check if player is new
+        if playerAddress in self.players.values():
+            # If not, print for logging and return False
+            print(f'{playerAddress} already registered!')
+            return(False)
+        # Check if player name is already taken
+        if playerName in self.players.keys():
+            # If so, print for logging and give a new name
+            print(f'{playerName} already taken, new name is {playerName + str(len(self.players))}')
+            playerName = playerName + str(len(self.players))
+        # If new, add player to dict
+        self.players.update({playerName: playerAddress})
+        self.scores.update({playerName: 0})
+        return(True)
 
     # Function for reading a game file sent between players
     # Returns a dict with player names, gamescore and game status
@@ -86,7 +107,7 @@ def main():
 
     ### prompt players to initiate game
     tournament = Tournament()
-    tournament.handleGameFile('testGameFile.txt')
+
     # store the results in the tournament data in local variable
     # tournament_data += tournament
     # send out tournamnet data
