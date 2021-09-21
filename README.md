@@ -9,7 +9,9 @@ This is a test.
 
 ## Game file key words:
 FPLAYER: Id of sending player
+FPCOLOUR: Colour of sending player
 TPLAYER: Id of receiving player
+TPCOLOUR: Colour of receiving player
 GAMEDONE: Boolean telling if the game is finished (0/1)
 GAMESCORE: The point difference between players. >0 -> FPLAYER is in lead, <0 -> TPLAYER is in lead.
 

@@ -82,8 +82,12 @@ class Tournament():
                 # If so, add information to dict
                 if line[0] == "FPLAYER:":
                     content['fplayer'] = line[1]
+                if line[0] == "FPCOLOUR:":
+                    content['fpcolour'] = line[1]
                 if line[0] == 'TPLAYER:':
                     content['tplayer'] = line[1]
+                if line[0] == 'TPCOLOUR:':
+                    content['tpcolour'] = line[1]
                 if line[0] == 'GAMESCORE:':
                     content['gamescore'] = int(line[1])
                 if line[0] == 'GAMEDONE:':
@@ -126,7 +130,9 @@ class Tournament():
             self.scores[fileContent['tplayer']] += self.settings['draw']
 
             self.history[self.gamesPlayed].update({'winner': 'draw'})
-
+        # Update player colours
+        self.colours[fileContent['fplayer']].append(fileContent['fpcolour'])
+        self.colours[fileContent['tplayer']].append(fileContent['tpcolour'])
         # Return true
         return(True)
 
@@ -185,21 +191,24 @@ class Tournament():
 
     # Function for generating data about the next game to be sent to the players
     def generateNextGameData(self):
+        # If it is the first game
         if self.firstGame:
+            # Randomly pick players
             player1 = random.choice(list(self.players.keys()))
             player2 = random.choice(list(self.players.keys()))
+            # Make sure they're not the same player
             while player2 == player1:
                 player2 = random.choice(list(self.players.keys()))
+            # Create dict
             nextGame = {'player1':player1, 'player1Colour': 'B', 'player2':player2, 'player2Colour': "W"}
-            self.colours[nextGame['player1']].append(nextGame['player1Colour'])
-            self.colours[nextGame['player2']].append(nextGame['player2Colour'])
+            # After this it won't be the first game
             self.firstGame = False
+            # Return dict
             return(nextGame)
+        # If  it's not the first game, generate a valid matchup
         nextGame = self.generateNextMatchup()
         # Generate placeholder colours
         nextGame.update({'player1Colour':'B', 'player2Colour': 'W'})
-        self.colours[nextGame['player1']].append(nextGame['player1Colour'])
-        self.colours[nextGame['player2']].append(nextGame['player2Colour'])
         return(nextGame)
 
     # Function for generating the tournament data file sent to the players
@@ -247,6 +256,7 @@ def main():
     tournament.handleGameFile('testGameFile0.txt')
     print(tournament.scores)
     print(tournament.history)
+    print(tournament.colours)
     tournament.generateTournamentFile('testTournamentFile0.txt')
     # store the results in the tournament data in local variable
     # tournament_data += tournament
