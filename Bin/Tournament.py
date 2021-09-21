@@ -1,8 +1,9 @@
 # Server containing Tournament classes
 
 class Tournament():
-    def __init__(self):
-        self.scores = {'Player2': 0, "Player1": 5}
+    def __init__(self, win=3, draw=1, loss=0):
+        self.settings = {"win": int(win), "draw": int(draw), "loss": int(loss)}
+        self.scores = {}
 
 
         ### read game history from server (such as last move made) from txt file
@@ -67,10 +68,15 @@ class Tournament():
             return(False)
         # If game is over and final score is greater than zero, add one point to sending player's score
         if fileContent['gamescore'] > 0:
-            self.scores[fileContent['fplayer']] += 1
+            self.scores[fileContent['fplayer']] += self.settings['win']
+            self.scores[fileContent['tplayer']] += self.settings['loss']
         # If final score is lower than zero, add one point to receiving player's score
         elif fileContent['gamescore'] < 0:
-            self.scores[fileContent['tplayer']] += 1
+            self.scores[fileContent['tplayer']] += self.settings['win']
+            self.scores[fileContent['fplayer']] += self.settings['loss']
+        elif fileContent['gamescore'] == 0:
+            self.scores[fileContent['fplayer']] += self.settings['draw']
+            self.scores[fileContent['tplayer']] += self.settings['draw']
         # Return true
         return(True)
 
