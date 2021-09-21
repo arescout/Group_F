@@ -3,13 +3,11 @@
 class Tournament():
     def __init__(self):
     
-        ### read game history 
+        ### read game history from server (such as last move made) from txt file
 
         ### let player make her/his move
 
-        ### store the data for that players move 
-
-        ### send updated data to al players
+        ### store the data for that players move and send to server
 
         ## if game finish -> 
             # let host decide point format? (not sure what this is for)
@@ -21,10 +19,12 @@ class Tournament():
 
 def main():
 
+    ## plan the color order of games to make sure everyone gets to play both colors
+
     ### prompt players to initiate game
     tournament = Tounament()
 
-    # store the results in the tournament data
+    # store the results in the tournament data in local variable
     # tournament_data += tournament
     # send out tournamnet data
 
