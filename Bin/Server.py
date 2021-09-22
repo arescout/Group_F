@@ -69,21 +69,31 @@ class Server():
     def threaded(self, c):
         while True:
             # data received from client
-            data = c.recv(1024)
+            data = c.recv(1024) 
             if not data:
                 print('Bye')
               
                 # lock released on exit
                 print_lock.release()
                 break
-  
-            # reverse the given string from client
+            
+            if(str(data.decode('ascii'))[0]=='G'):
+                self.receiveFile(c, 'testGameFile.txt', data)
+                ### Todo: Make change in the gamefile to be sent
+                self.send('testGameFile.txt')  ## only send to client 
+
+            elif(str(data.decode('ascii'))[0]=='T'):
+                self.receiveFile(c, 'testTournamentFile.txt', data)
+                #### Todo: Make change in the tournamentfile to be sent
+                self.sendFile(c, 'testTournamentFile.txt')  ### send to all
+
+            # reverse the given string from client ???
             #data = data[::-1]
   
             # send back reversed string to client
-            c.send(data)
-            self.receiveFile(c, "sampleRec.txt", data)
-            print(data)
+            #c.send(data)
+            #self.receiveFile(c, "sampleRec.txt", data)
+            #print(str(data.decode('ascii'))[0])
    
         # connection closed
         c.close()
