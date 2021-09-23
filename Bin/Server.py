@@ -57,13 +57,34 @@ class Server():
                     clientSocket.sendall(bytesRead)
         return True
     
-    def receiveFile(self, clientSocket, filePath, data):
+    def receiveGameFile(self, clientSocket, filePath, data):
         # Open or create a file at the given address
+        bufferSize = 4096
         with open(filePath, "wb") as f:
-            # Receive data from the socket
-            #bytesRead = clientSocket.recv(self.bufferSize)
-            # Write the data to the file
             f.write(data)
+            while True:
+            # Receive data from the socket
+                bytesread =  clientSocket.recv(4096) 
+                        # If no new data is read, all is sent. Break the loop
+                if not data:
+                    break           
+                # Write the data to the file
+                f.write(bytesread)
+        return True
+
+    def receiveTournamentFile(self, clientSocket, filePath, data):
+        # Open or create a file at the given address
+        bufferSize = 4096
+        with open(filePath, "wb") as f:
+            f.write(data)
+            while True:
+            # Receive data from the socket
+                bytesread =  clientSocket.recv(4096) 
+                        # If no new data is read, all is sent. Break the loop
+                if not data:
+                    break           
+                # Write the data to the file
+                f.write(bytesread)
         return True
     
     def threaded(self, c):
@@ -78,13 +99,13 @@ class Server():
                 break
             
             if(str(data.decode('ascii'))[0]=='G'):
-                self.receiveFile(c, 'testGameFile.txt', data)
-                ### Todo: Make change in the gamefile to be sent
-                self.send('testGameFile.txt')  ## only send to client 
+                self.receiveGameFile(c, 'testGameFile.txt', data)
+                ### Todo: Make change in the gamefile to be sent?
+                self.sendFile('testGameFile.txt')  ## only send to client 
 
             elif(str(data.decode('ascii'))[0]=='T'):
                 self.receiveFile(c, 'testTournamentFile.txt', data)
-                #### Todo: Make change in the tournamentfile to be sent
+                #### Todo: Make change in the tournamentfile to be sent?
                 self.sendFile(c, 'testTournamentFile.txt')  ### send to all
 
             # reverse the given string from client ???
