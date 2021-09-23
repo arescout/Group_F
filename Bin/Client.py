@@ -1,12 +1,15 @@
 # File containing client classes
 # Imports of external packages
 import socket
+import json
 
 # Class for handling everyting on the client side
 class Client():
-    def __init__(self,serverAddress, serverPort):
+    def __init__(self,serverAddress, serverPort, pname):
         # Set how many bytes to accept from a socket
         self.bufferSize = 4096
+        # Set playername in game
+        self.pname = pname
         # Inititate a Socket
         self.s = socket.socket()
         # Connect to a socket with a given address and port
@@ -14,7 +17,7 @@ class Client():
         self.s.connect((socket.gethostname(),serverPort))
         # Receive a file that is sent instantly from the server
         #self.receiveFile(self.s,'testReceive.txt')
-        self.s.send(f"Hello".encode('ascii'))
+        self.s.send(str.encode(json.dumps({'name': self.pname})))
         while True:
             data = self.s.recv(1024)
             print("Recieved from server", str(data.decode('ascii')))
@@ -39,7 +42,13 @@ class Client():
         return True
 
 def main():
-    client = Client('127.0.0.1', 1234)
+    #addr = str(input('Enter server address: '))
+    #port = int(input('Enter server port: '))
+    #pname = str(input('Enter player name (without blankspaces): '))
+    addr='127.0.0.1'
+    port=2232
+    pname='p'
+    client = Client(addr, port, pname)
 
 
 if __name__ == '__main__':

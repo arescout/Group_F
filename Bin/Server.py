@@ -3,6 +3,7 @@
 import socket
 from _thread import *
 import threading
+import json
 
 print_lock = threading.Lock()
 
@@ -14,6 +15,7 @@ class Server():
     def __init__(self, port):
         # Define what port to use, this should be entered by the host
         self.port = port
+        self.players = {}
         # Initiate the Socket
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # Bind the socket to the given port on localhost
@@ -28,11 +30,13 @@ class Server():
             # Accept an incomming connection
             clientSocket, address = s.accept()
             # Print the address for logging purposes
-            print(address)
+            name = clientSocket.recv(1024)
+            name = json.loads(name)
+            self.players.update({name['name']:clientSocket})
             print_lock.acquire()
             # Send a file
             #self.sendFile(clientSocket, 'testFile.txt')
-            print('Connected to :', address[0], ':', address[1])
+            print('Connected to :', address[0], ':', address[1],': player', name['name'])
             start_new_thread(self.threaded, (clientSocket, ))
             print_lock.release()
         # Close the socket
@@ -56,7 +60,7 @@ class Server():
                     # Send the read data through the socket
                     clientSocket.sendall(bytesRead)
         return True
-    
+
     def receiveFile(self, clientSocket, filePath, data):
         # Open or create a file at the given address
         with open(filePath, "wb") as f:
@@ -65,22 +69,22 @@ class Server():
             # Write the data to the file
             f.write(data)
         return True
-    
+
     def threaded(self, c):
         while True:
             # data received from client
-            data = c.recv(1024) 
+            data = c.recv(1024)
             if not data:
                 print('Bye')
-              
+
                 # lock released on exit
                 print_lock.release()
                 break
-            
+
             if(str(data.decode('ascii'))[0]=='G'):
                 self.receiveFile(c, 'testGameFile.txt', data)
                 ### Todo: Make change in the gamefile to be sent
-                self.send('testGameFile.txt')  ## only send to client 
+                self.send('testGameFile.txt')  ## only send to client
 
             elif(str(data.decode('ascii'))[0]=='T'):
                 self.receiveFile(c, 'testTournamentFile.txt', data)
@@ -89,18 +93,18 @@ class Server():
 
             # reverse the given string from client ???
             #data = data[::-1]
-  
+
             # send back reversed string to client
             #c.send(data)
             #self.receiveFile(c, "sampleRec.txt", data)
             #print(str(data.decode('ascii'))[0])
-   
+
         # connection closed
         c.close()
 
 
 def main():
-    server = Server(1234)
+    server = Server(2232)
 
 
 if __name__ == '__main__':
