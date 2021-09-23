@@ -1,3 +1,4 @@
+G
 GAMEDONE: 1
 TPLAYER: Player1
 FPLAYER: Player2

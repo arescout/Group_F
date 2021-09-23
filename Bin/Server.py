@@ -47,14 +47,13 @@ class Server():
         with open(filePath, 'rb') as f:
             while(True):
                 # Make sure all data is read
-                while True:
-                    # Read the given amount of data from the file
-                    bytesRead = f.read(bufferSize)
-                    # If no new data is read, all is sent. Break the loop
-                    if not bytesRead:
-                        break
-                    # Send the read data through the socket
-                    clientSocket.sendall(bytesRead)
+                # Read the given amount of data from the file
+                bytesRead = f.read(bufferSize)
+                # If no new data is read, all is sent. Break the loop
+                if not bytesRead:
+                    break
+                # Send the read data through the socket
+                clientSocket.sendall(bytesRead)
         return True
     
     def receiveGameFile(self, clientSocket, filePath, data):
@@ -65,7 +64,7 @@ class Server():
             while True:
             # Receive data from the socket
                 bytesread =  clientSocket.recv(4096) 
-                        # If no new data is read, all is sent. Break the loop
+                # If no new data is read, all is sent. Break the loop
                 if not data:
                     break           
                 # Write the data to the file
@@ -80,7 +79,7 @@ class Server():
             while True:
             # Receive data from the socket
                 bytesread =  clientSocket.recv(4096) 
-                        # If no new data is read, all is sent. Break the loop
+                
                 if not data:
                     break           
                 # Write the data to the file

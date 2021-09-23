@@ -14,9 +14,10 @@ class Client():
         self.s.connect((socket.gethostname(),serverPort))
         # Receive a file that is sent instantly from the server
         #self.receiveFile(self.s,'testReceive.txt')
-        self.s.send(f"Hello".encode('ascii'))
+        #self.s.send(f"Hello".encode('ascii'))
         while True:
             data = self.s.recv(1024)
+            self.receiveFile(self.s,'testReceive.txt', data)
             print("Recieved from server", str(data.decode('ascii')))
             ans = input("Do you want to send a message?")
             if ans == 'y':
@@ -28,14 +29,20 @@ class Client():
         self.s.close()
 
     # Function for receiving a file from a socket
-    # This function assumes that all data is sent in one transmission, ie the file isn't bigger than bufferSize
-    def receiveFile(self, socket, filePath):
+    # This function assumes that all data is sent in one transmission, ie the file isn't bigger than bufferSize. 
+    # - Not anymore I think?
+    def receiveFile(self, socket, filePath, data):
         # Open or create a file at the given address
         with open(filePath, "wb") as f:
-            # Receive data from the socket
-            bytesRead = socket.recv(self.bufferSize)
-            # Write the data to the file
-            f.write(bytesRead)
+            f.write(data)
+            while True:
+                # Receive data from the socket
+                bytesRead = socket.recv(self.bufferSize)
+                # If no new data is read, all is sent. Break the loop
+                if not bytesRead:
+                    break
+                # Write the data to the file
+                f.write(bytesRead)
         return True
 
 def main():
