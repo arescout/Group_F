@@ -17,6 +17,7 @@ class Server():
         # Define what port to use, this should be entered by the host
         self.port = port
         self.players = {}
+        self.connections = []
         # Initiate the Socket
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # Bind the socket to the given port on localhost
@@ -39,9 +40,11 @@ class Server():
             #self.sendFile(clientSocket, 'testFile.txt')
             clientSocket.send("hejHEJHEJ".encode("ascii"))
             print('Connected to :', address[0], ':', address[1],': player', name['name'])
-            start_new_thread(self.threaded, (clientSocket, ))
-            print_lock.release()
-        # Close the socket
+            connection = Connection(address[1], clientSocket)
+            self.connections.append(connection)
+
+            #print_lock.release()
+            # Close the socket
         s.close()
         return
 
@@ -72,44 +75,48 @@ class Server():
             f.write(data)
         return True
 
-    def threaded(self, c):
+    
+
+class Connection():
+    def __init__(self, port, clientSocket):
+        self.sendQueue = []
+        self.clientSocket = clientSocket
+        self.port = port
+        y = threading.Thread(target=self.recvThread)
+        y.start()
+        x = threading.Thread(target=self.sendThread)
+        x.start()
+        self.send("Welcome")
+        time.sleep(1)
+        self.send("Welcome2")
+
+    def recvThread(self):
         while True:
-            # data received from client
-            time.sleep(5)
-            c.send("I THREADED I SERVERN".encode("ascii"))
-            data = c.recv(1024)
-            print(data)
-            if not data:
-                print('Bye')
+            data = self.clientSocket.recv(1024)
+            #self.send(data.decode("utf-8"))
+            self.onMsg(data)
 
-                # lock released on exit
-                print_lock.release()
-                break
-
-            if(str(data.decode('ascii'))[0]=='G'):
-                self.receiveFile(c, 'testGameFile.txt', data)
-                ### Todo: Make change in the gamefile to be sent
-                self.send('testGameFile.txt')  ## only send to client
-
-            elif(str(data.decode('ascii'))[0]=='T'):
-                self.receiveFile(c, 'testTournamentFile.txt', data)
-                #### Todo: Make change in the tournamentfile to be sent
-                self.sendFile(c, 'testTournamentFile.txt')  ### send to all
-
-            # reverse the given string from client ???
-            #data = data[::-1]
-
-            # send back reversed string to client
-            #c.send(data)
-            #self.receiveFile(c, "sampleRec.txt", data)
-            #print(str(data.decode('ascii'))[0])
-
-        # connection closed
-        c.close()
+    def sendThread(self):
+        while True:
+            time.sleep(0.01)
+            while len(self.sendQueue) != 0:
+                self.clientSocket.send(self.sendQueue.pop(0))
+                #self.clientSocket.send(f"Hallo {self.port}".encode("utf-8"))
+            #print_lock.release()
+    def send(self, msg):
+        self.sendQueue.append(msg.encode("utf-8"))
+    def onMsg(self, msg):
+        print(msg.decode("utf-8"))     
+        
+    
 
 
 def main():
+    print("before initiation")
     server = Server(2232)
+    time.sleep(10)
+    print("SERVER")
+    server.connections[0].send("TESTCONNECTIONS")
 
 
 if __name__ == '__main__':
