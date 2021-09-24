@@ -24,6 +24,10 @@ class Client():
         # Receive a file that is sent instantly from the server
         #self.receiveFile(self.s,'testReceive.txt')
         self.s.send(str.encode(json.dumps({'name': self.pname})))
+<<<<<<< HEAD
+=======
+        #print("innan start new thread")
+>>>>>>> 4a1f1a9b7768fcac28c5f4255a908db5cc6c1aae
         #start_new_thread(self.threaded, (self.s, ))
 
         x = threading.Thread(target=self.listeningThread)
@@ -42,9 +46,15 @@ class Client():
             # Write the data to the file
             f.write(bytesRead)
         return True
+    def sendFile(self, msg):
+        self.s.send(msg.encode("utf-8"))
 
     def listeningThread(self):
         while True:
+<<<<<<< HEAD
+=======
+            #print("I WHILE")
+>>>>>>> 4a1f1a9b7768fcac28c5f4255a908db5cc6c1aae
             # data received from client
             data = self.s.recv(1024)
             #print("efter data")
@@ -52,6 +62,12 @@ class Client():
                 print('Bye')
                 break
                 # lock released on exit
+<<<<<<< HEAD
+=======
+            self.s.send("FRÅN CLIENT TILL SERVER".encode("utf-8"))
+            time.sleep(1)
+            print("Recieved from server", str(data.decode('utf-8')))
+>>>>>>> 4a1f1a9b7768fcac28c5f4255a908db5cc6c1aae
             #print_lock.release()
 
         self.s.close()
@@ -66,9 +82,18 @@ def main():
     #pname = str(input('Enter player name (without blankspaces): '))
     addr='127.0.0.1'
     port=2232
+<<<<<<< HEAD
     pname='Player1'
     client = Client(addr, port, pname)
     return
+=======
+    pname='p'
+    client = Client(addr, port, pname)    
+    #print("förbi client")
+    client.s.send("TEST SKICK".encode("ascii"))
+    #time.sleep(10)
+    #print("efter sleep i clienten")
+>>>>>>> 4a1f1a9b7768fcac28c5f4255a908db5cc6c1aae
 
 
 if __name__ == '__main__':
