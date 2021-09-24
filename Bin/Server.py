@@ -16,7 +16,10 @@ class Server():
     def __init__(self, port):
         # Define what port to use, this should be entered by the host
         self.port = port
+        # Dict for storing player's sockets
         self.players = {}
+        # Initiate the tournamen
+        tournament = Tournament()
         # Initiate the Socket
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # Bind the socket to the given port on localhost
@@ -30,9 +33,13 @@ class Server():
         while True:
             # Accept an incomming connection
             clientSocket, address = s.accept()
+            if len(self.players) >= 8:
+                print('Game is full')
+                continue
             # Print the address for logging purposes
             name = clientSocket.recv(1024)
             name = json.loads(name)
+            tournament.addPlayer(name['name'])
             self.players.update({name['name']:clientSocket})
             print_lock.acquire()
             # Send a file

@@ -24,14 +24,13 @@ class Client():
         # Receive a file that is sent instantly from the server
         #self.receiveFile(self.s,'testReceive.txt')
         self.s.send(str.encode(json.dumps({'name': self.pname})))
-        print("innan start new thread")
         #start_new_thread(self.threaded, (self.s, ))
-        
+
         x = threading.Thread(target=self.listeningThread)
         x.start()
-        
+
         return
-            
+
 
     # Function for receiving a file from a socket
     # This function assumes that all data is sent in one transmission, ie the file isn't bigger than bufferSize
@@ -46,7 +45,6 @@ class Client():
 
     def listeningThread(self):
         while True:
-            print("I WHILE")
             # data received from client
             data = self.s.recv(1024)
             #print("efter data")
@@ -54,9 +52,8 @@ class Client():
                 print('Bye')
                 break
                 # lock released on exit
-            print("Recieved from server", str(data.decode('ascii')))
             #print_lock.release()
-            
+
         self.s.close()
 
     def closeClient(self):
@@ -69,12 +66,9 @@ def main():
     #pname = str(input('Enter player name (without blankspaces): '))
     addr='127.0.0.1'
     port=2232
-    pname='p'
-    client = Client(addr, port, pname)    
-    print("förbi client")
-    client.s.send("TEST SKICK".encode("ascii"))
-    time.sleep(10)
-    print("efter sleep i clienten")
+    pname='Player1'
+    client = Client(addr, port, pname)
+    return
 
 
 if __name__ == '__main__':
