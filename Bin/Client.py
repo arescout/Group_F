@@ -1,7 +1,13 @@
 # File containing client classes
 # Imports of external packages
 import socket
+from _thread import *
+import threading
 import json
+import time
+
+
+print_lock = threading.Lock()
 
 # Class for handling everyting on the client side
 class Client():
@@ -18,17 +24,14 @@ class Client():
         # Receive a file that is sent instantly from the server
         #self.receiveFile(self.s,'testReceive.txt')
         self.s.send(str.encode(json.dumps({'name': self.pname})))
-        while True:
-            data = self.s.recv(1024)
-            print("Recieved from server", str(data.decode('ascii')))
-            ans = input("Do you want to send a message?")
-            if ans == 'y':
-                msg = input("Insert Message:")
-                self.s.send(msg.encode('ascii'))
-                continue
-            else:
-                break
-        self.s.close()
+        print("innan start new thread")
+        #start_new_thread(self.threaded, (self.s, ))
+        
+        x = threading.Thread(target=self.listeningThread)
+        x.start()
+        
+        return
+            
 
     # Function for receiving a file from a socket
     # This function assumes that all data is sent in one transmission, ie the file isn't bigger than bufferSize
@@ -41,6 +44,25 @@ class Client():
             f.write(bytesRead)
         return True
 
+    def listeningThread(self):
+        while True:
+            print("I WHILE")
+            # data received from client
+            data = self.s.recv(1024)
+            #print("efter data")
+            if not data:
+                print('Bye')
+                break
+                # lock released on exit
+            print("Recieved from server", str(data.decode('ascii')))
+            #print_lock.release()
+            
+        self.s.close()
+
+    def closeClient(self):
+        self.s.close()
+        print_lock.release()
+
 def main():
     #addr = str(input('Enter server address: '))
     #port = int(input('Enter server port: '))
@@ -48,7 +70,11 @@ def main():
     addr='127.0.0.1'
     port=2232
     pname='p'
-    client = Client(addr, port, pname)
+    client = Client(addr, port, pname)    
+    print("förbi client")
+    client.s.send("TEST SKICK".encode("ascii"))
+    time.sleep(10)
+    print("efter sleep i clienten")
 
 
 if __name__ == '__main__':

@@ -4,6 +4,7 @@ import socket
 from _thread import *
 import threading
 import json
+import time
 
 print_lock = threading.Lock()
 
@@ -36,6 +37,7 @@ class Server():
             print_lock.acquire()
             # Send a file
             #self.sendFile(clientSocket, 'testFile.txt')
+            clientSocket.send("hejHEJHEJ".encode("ascii"))
             print('Connected to :', address[0], ':', address[1],': player', name['name'])
             start_new_thread(self.threaded, (clientSocket, ))
             print_lock.release()
@@ -73,7 +75,10 @@ class Server():
     def threaded(self, c):
         while True:
             # data received from client
+            time.sleep(5)
+            c.send("I THREADED I SERVERN".encode("ascii"))
             data = c.recv(1024)
+            print(data)
             if not data:
                 print('Bye')
 
