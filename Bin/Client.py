@@ -24,7 +24,7 @@ class Client():
         # Receive a file that is sent instantly from the server
         #self.receiveFile(self.s,'testReceive.txt')
         self.s.send(str.encode(json.dumps({'name': self.pname})))
-        print("innan start new thread")
+        #print("innan start new thread")
         #start_new_thread(self.threaded, (self.s, ))
         
         x = threading.Thread(target=self.listeningThread)
@@ -43,10 +43,12 @@ class Client():
             # Write the data to the file
             f.write(bytesRead)
         return True
+    def sendFile(self, msg):
+        self.s.send(msg.encode("utf-8"))
 
     def listeningThread(self):
         while True:
-            print("I WHILE")
+            #print("I WHILE")
             # data received from client
             data = self.s.recv(1024)
             #print("efter data")
@@ -54,7 +56,9 @@ class Client():
                 print('Bye')
                 break
                 # lock released on exit
-            print("Recieved from server", str(data.decode('ascii')))
+            self.s.send("FRÅN CLIENT TILL SERVER".encode("utf-8"))
+            time.sleep(1)
+            print("Recieved from server", str(data.decode('utf-8')))
             #print_lock.release()
             
         self.s.close()
@@ -71,10 +75,10 @@ def main():
     port=2232
     pname='p'
     client = Client(addr, port, pname)    
-    print("förbi client")
+    #print("förbi client")
     client.s.send("TEST SKICK".encode("ascii"))
-    time.sleep(10)
-    print("efter sleep i clienten")
+    #time.sleep(10)
+    #print("efter sleep i clienten")
 
 
 if __name__ == '__main__':
