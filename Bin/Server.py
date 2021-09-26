@@ -18,8 +18,10 @@ class Server():
         self.port = port
         # Dict for storing player's sockets
         self.players = {}
+
         self.connections = []
         self.tournament = Tournament()
+
         # Initiate the Socket
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # Bind the socket to the given port on localhost
@@ -39,17 +41,22 @@ class Server():
         # For now, this loop will continue until manually terminated
         while True:
             # Accept an incomming connection
+
             clientSocket, address = self.s.accept()
+
             if len(self.players) >= 8:
                 print('Game is full')
                 continue
             # Print the address for logging purposes
             name = clientSocket.recv(1024)
             name = json.loads(name)
+
             self.tournament.addPlayer(name['name'], address)
+
             self.players.update({name['name']:clientSocket})
             #print_lock.acquire()
             print('Connected to :', address[0], ':', address[1],': player', name['name'])
+
             connection = Connection(self,address[1], clientSocket)
             self.connections.append(connection)
         return
@@ -81,6 +88,7 @@ class Server():
             f.write(data)
         return True
 
+
     def sendTournamentFile(self):
         filePath = 'tournamentFile.txt'
         self.tournament.generateTournamentFile(filePath)
@@ -106,6 +114,7 @@ class Server():
 class Connection():
     def __init__(self, server, port, clientSocket):
         self.server = server
+
         self.sendQueue = []
         self.clientSocket = clientSocket
         self.port = port
@@ -113,6 +122,7 @@ class Connection():
         y.start()
         x = threading.Thread(target=self.sendThread)
         x.start()
+
 
     def recvThread(self):
         filePath = 'tempFile.txt'
@@ -138,7 +148,9 @@ class Connection():
 
 
 def main():
+    print("before initiation")
     server = Server(2232)
+
     startGame = False
     while not startGame:
         if len(server.tournament.players) == 0:
@@ -160,6 +172,7 @@ def main():
             continue
         else:
             print(f'\'{act}\' is not a valid input.')
+
 
 
 if __name__ == '__main__':

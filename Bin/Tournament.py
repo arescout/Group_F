@@ -53,7 +53,7 @@ class Tournament():
         self.matchups.update({playerName: []})
         self.colours.update({playerName: []})
         self.scores.update({playerName: 0})
-        return(True)
+        return(playerName)
 
     # Function for reading a game file sent between players
     # Returns a dict with player names, gamescore and game status

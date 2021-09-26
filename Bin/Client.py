@@ -24,6 +24,7 @@ class Client():
         # Receive a file that is sent instantly from the server
         #self.receiveFile(self.s,'testReceive.txt')
         self.s.send(str.encode(json.dumps({'name': self.pname})))
+
         #start_new_thread(self.threaded, (self.s, ))
 
         x = threading.Thread(target=self.listeningThread)
@@ -40,6 +41,8 @@ class Client():
             # Write the data to the file
             f.write(data)
         return True
+    def sendFile(self, msg):
+        self.s.send(msg.encode("utf-8"))
 
     def sendFile(self, filePath):
         with open(filePath, 'rb') as f:
@@ -49,6 +52,7 @@ class Client():
 
     def listeningThread(self):
         while True:
+
             # data received from client
             data = self.s.recv(1024)
             #print("efter data")
@@ -56,8 +60,10 @@ class Client():
                 print('Bye')
                 break
                 # lock released on exit
+
             filePath = str(time.localtime())+'.txt'
             self.receiveFile(filePath, data)
+
             #print_lock.release()
 
         self.s.close()
@@ -72,6 +78,7 @@ def main():
     pname = str(input('Enter player name (without blankspaces): '))
     addr='127.0.0.1'
     port=2232
+
     #pname='Player1'
     client = Client(addr, port, pname)
     time.sleep(15)
