@@ -24,10 +24,7 @@ class Client():
         # Receive a file that is sent instantly from the server
         #self.receiveFile(self.s,'testReceive.txt')
         self.s.send(str.encode(json.dumps({'name': self.pname})))
-<<<<<<< HEAD
-=======
-        #print("innan start new thread")
->>>>>>> 4a1f1a9b7768fcac28c5f4255a908db5cc6c1aae
+
         #start_new_thread(self.threaded, (self.s, ))
 
         x = threading.Thread(target=self.listeningThread)
@@ -38,23 +35,24 @@ class Client():
 
     # Function for receiving a file from a socket
     # This function assumes that all data is sent in one transmission, ie the file isn't bigger than bufferSize
-    def receiveFile(self, socket, filePath):
+    def receiveFile(self, filePath, data):
         # Open or create a file at the given address
         with open(filePath, "wb") as f:
-            # Receive data from the socket
-            bytesRead = socket.recv(self.bufferSize)
             # Write the data to the file
-            f.write(bytesRead)
+            f.write(data)
         return True
     def sendFile(self, msg):
         self.s.send(msg.encode("utf-8"))
 
+    def sendFile(self, filePath):
+        with open(filePath, 'rb') as f:
+            content = f.read()
+            self.s.send(content)
+        return(print(f'Sent {filePath}'))
+
     def listeningThread(self):
         while True:
-<<<<<<< HEAD
-=======
-            #print("I WHILE")
->>>>>>> 4a1f1a9b7768fcac28c5f4255a908db5cc6c1aae
+
             # data received from client
             data = self.s.recv(1024)
             #print("efter data")
@@ -62,12 +60,10 @@ class Client():
                 print('Bye')
                 break
                 # lock released on exit
-<<<<<<< HEAD
-=======
-            self.s.send("FRÅN CLIENT TILL SERVER".encode("utf-8"))
-            time.sleep(1)
-            print("Recieved from server", str(data.decode('utf-8')))
->>>>>>> 4a1f1a9b7768fcac28c5f4255a908db5cc6c1aae
+
+            filePath = str(time.localtime())+'.txt'
+            self.receiveFile(filePath, data)
+
             #print_lock.release()
 
         self.s.close()
@@ -79,21 +75,16 @@ class Client():
 def main():
     #addr = str(input('Enter server address: '))
     #port = int(input('Enter server port: '))
-    #pname = str(input('Enter player name (without blankspaces): '))
+    pname = str(input('Enter player name (without blankspaces): '))
     addr='127.0.0.1'
     port=2232
-<<<<<<< HEAD
-    pname='Player1'
+
+    #pname='Player1'
     client = Client(addr, port, pname)
+    time.sleep(15)
+    print('sending')
+    client.s.send(f'From {pname}.'.encode('ascii'))
     return
-=======
-    pname='p'
-    client = Client(addr, port, pname)    
-    #print("förbi client")
-    client.s.send("TEST SKICK".encode("ascii"))
-    #time.sleep(10)
-    #print("efter sleep i clienten")
->>>>>>> 4a1f1a9b7768fcac28c5f4255a908db5cc6c1aae
 
 
 if __name__ == '__main__':

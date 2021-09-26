@@ -8,6 +8,8 @@ This is a test.
 - Player names can't contain blankspaces
 
 ## Game file key words:
+Game files are files sent between two active players. The file should consist of all relevant game state data AND the following key word-value pairs:
+GAMEFILE - the first word of the document.
 FPLAYER: Id of sending player
 FPCOLOUR: Colour of sending player
 TPLAYER: Id of receiving player

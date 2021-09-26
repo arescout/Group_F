@@ -18,65 +18,68 @@ class Server():
         self.port = port
         # Dict for storing player's sockets
         self.players = {}
-<<<<<<< HEAD
-        # Initiate the tournamen
-        tournament = Tournament()
-=======
+
         self.connections = []
->>>>>>> 4a1f1a9b7768fcac28c5f4255a908db5cc6c1aae
+        self.tournament = Tournament()
+
         # Initiate the Socket
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # Bind the socket to the given port on localhost
-        s.bind((socket.gethostname(),port))
+        self.s.bind((socket.gethostname(),port))
         print("socket binded to port", port)
+
+        self.listenThread = threading.Thread(target=self.listenForConnections)
+        self.listenThread.start()
+
+        return
+
+    def listenForConnections(self):
         # Define how many unanswered connections the socket will allow to queue
-        s.listen(8)
+        self.s.listen(8)
         print("socket is listening")
         # Start listening to connections
         # For now, this loop will continue until manually terminated
         while True:
             # Accept an incomming connection
-            clientSocket, address = s.accept()
+
+            clientSocket, address = self.s.accept()
+
             if len(self.players) >= 8:
                 print('Game is full')
                 continue
             # Print the address for logging purposes
             name = clientSocket.recv(1024)
             name = json.loads(name)
-            tournament.addPlayer(name['name'])
-            self.players.update({name['name']:clientSocket})
-            print_lock.acquire()
-            # Send a file
-            #self.sendFile(clientSocket, 'testFile.txt')
-            clientSocket.send("hejHEJHEJ".encode("ascii"))
-            print('Connected to :', address[0], ':', address[1],': player', name['name'])
-            connection = Connection(address[1], clientSocket)
-            self.connections.append(connection)
 
-            #print_lock.release()
-            # Close the socket
-        s.close()
+            self.tournament.addPlayer(name['name'], address)
+
+            self.players.update({name['name']:clientSocket})
+            #print_lock.acquire()
+            print('Connected to :', address[0], ':', address[1],': player', name['name'])
+
+            connection = Connection(self,address[1], clientSocket)
+            self.connections.append(connection)
         return
 
+    def closeSocket(self):
+        s.close()
     # Function for sending files through the socket
     def sendFile(self, clientSocket, filePath):
         # Define how many bytes to send at a time
         bufferSize = 4096
         # Open the file that is to be transferred
         with open(filePath, 'rb') as f:
-            while(True):
-                # Make sure all data is read
-                while True:
-                    # Read the given amount of data from the file
-                    bytesRead = f.read(bufferSize)
-                    # If no new data is read, all is sent. Break the loop
-                    if not bytesRead:
-                        break
-                    # Send the read data through the socket
-                    clientSocket.sendall(bytesRead)
+            while True:
+                # Read the given amount of data from the file
+                bytesRead = f.read(bufferSize)
+                # If no new data is read, all is sent. Break the loop
+                if not bytesRead:
+                    break
+                # Send the read data through the socket
+                clientSocket.sendall(bytesRead)
         return True
 
-    def receiveFile(self, clientSocket, filePath, data):
+    def receiveFile(self, filePath, data):
         # Open or create a file at the given address
         with open(filePath, "wb") as f:
             # Receive data from the socket
@@ -85,10 +88,33 @@ class Server():
             f.write(data)
         return True
 
-    
+
+    def sendTournamentFile(self):
+        filePath = 'tournamentFile.txt'
+        self.tournament.generateTournamentFile(filePath)
+        for player in self.players.values():
+            print(f'Sending to {player}')
+            self.sendFile(player, filePath)
+        return(True)
+    def handleFile(self, filePath):
+        with open(filePath, 'r+') as f:
+            if f.readline() == 'GAMEFILE':
+                self.tournament.handleGameFile(filePath)
+                for line in f.readlines():
+                    line = line.split()
+                    if line[0].rstrip() == 'TPLAYER':
+                        self.sendFile(self.players[line[1].rstrip()], filePath)
+                        return(f'Forwarded gamefile to {self.players[line[1].rstrip()]}')
+        return
+
+
+
+
 
 class Connection():
-    def __init__(self, port, clientSocket):
+    def __init__(self, server, port, clientSocket):
+        self.server = server
+
         self.sendQueue = []
         self.clientSocket = clientSocket
         self.port = port
@@ -96,15 +122,15 @@ class Connection():
         y.start()
         x = threading.Thread(target=self.sendThread)
         x.start()
-        self.send("Welcome")
-        time.sleep(1)
-        self.send("Welcome2")
+
 
     def recvThread(self):
+        filePath = 'tempFile.txt'
         while True:
             data = self.clientSocket.recv(1024)
             #self.send(data.decode("utf-8"))
-            self.onMsg(data)
+            self.server.receiveFile(filePath, data)
+            self.server.handleFile(filePath)
 
     def sendThread(self):
         while True:
@@ -116,17 +142,37 @@ class Connection():
     def send(self, msg):
         self.sendQueue.append(msg.encode("utf-8"))
     def onMsg(self, msg):
-        print(msg.decode("utf-8"))     
-        
-    
+        print(msg.decode("utf-8"))
+
+
 
 
 def main():
     print("before initiation")
     server = Server(2232)
-    time.sleep(10)
-    print("SERVER")
-    server.connections[0].send("TESTCONNECTIONS")
+
+    startGame = False
+    while not startGame:
+        if len(server.tournament.players) == 0:
+            print('Waiting for players to connect...')
+            time.sleep(5)
+            continue
+        if len(server.tournament.players) == 1:
+            print('Currently only one player connected, waiting for at least one more...')
+            time.sleep(5)
+            continue
+        print(f'Currently {len(server.tournament.players)} player(s) has joined.')
+        print(server.tournament.players)
+        act = input('Options: start - start the game, ref - refresh the count: ')
+        if act == 'start':
+            print('Initializing Torunament')
+            server.sendTournamentFile()
+            break
+        elif act == 'ref':
+            continue
+        else:
+            print(f'\'{act}\' is not a valid input.')
+
 
 
 if __name__ == '__main__':

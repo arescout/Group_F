@@ -39,6 +39,7 @@ class Tournament():
     def addPlayer(self, playerName, playerAddress):
         # Check if player is new
         if playerAddress in self.players.values():
+            print(playerAddress)
             # If not, print for logging and return False
             print(f'{playerAddress} already registered!')
             return(False)
@@ -192,6 +193,7 @@ class Tournament():
     # Function for generating data about the next game to be sent to the players
     def generateNextGameData(self):
         # If it is the first game
+        print(f'In generate, {self.firstGame}')
         if self.firstGame:
             # Randomly pick players
             player1 = random.choice(list(self.players.keys()))
@@ -213,12 +215,14 @@ class Tournament():
 
     # Function for generating the tournament data file sent to the players
     def generateTournamentFile(self, filePath):
+        print('In Torunament')
         # Get the sorted scoreboard
         sortedScores = self.generateSortedScores()
         # Generate data about next game
         nextGame = self.generateNextGameData()
         # Open a writable file
         with open(filePath, 'w+') as f:
+            print(f'Openened {filePath}')
             # Add how many games has been played
             f.write(f'GAMESPLAYED: {self.gamesPlayed}\n')
             # Iterate over each player in the dict with sorted scores
