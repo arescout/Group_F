@@ -101,14 +101,14 @@ class Server:
         with open(filePath, 'r+') as f:
             firstLine = f.readline()
             if 'GAMEFILE' in firstLine:
-                self.tournament.handleGameFile(filePath)
+                gameDone = self.tournament.handleGameFile(filePath)
                 print(self.tournament.history)
                 for line in f.readlines():
                     line = line.split()
                     if line[0].rstrip() == 'TPLAYER:':
                         self.sendFile(self.players[line[1].rstrip()], filePath)
                         print(f'Forwarded gamefile to {line[1].rstrip()}')
-                        return
+                        return(gameDone)
             else:
                 print(f'Received unknown file type: {firstLine}')
                 return
@@ -133,7 +133,10 @@ class Connection:
             data = self.clientSocket.recv(1024)
             #self.send(data.decode("utf-8"))
             self.server.receiveFile(filePath, data)
-            self.server.handleFile(filePath)
+            isGameDone = self.server.handleFile(filePath)
+            if isGameDone:
+                self.server.sendTournamentFile()
+        return
 
     def sendThread(self):
         while True:
@@ -170,6 +173,7 @@ def main():
         if act == 'start':
             print('Initializing Torunament')
             server.tournament.generateMatchColor()  # this is to predefine color of player for each match
+            print(server.tournament.matchingColor)
             server.sendTournamentFile()
             break
         elif act == 'ref':

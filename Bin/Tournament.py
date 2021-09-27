@@ -141,7 +141,7 @@ class Tournament:
         self.colours[fileContent['fplayer']].append(fileContent['fpcolour'])
         self.colours[fileContent['tplayer']].append(fileContent['tpcolour'])
         # Return true
-        return True
+        return(True)
 
     # Function for generating a sorted scoreboard dict
     def generateSortedScores(self):
@@ -220,7 +220,8 @@ class Tournament:
         player2ID = self.players[nextGame['player1']][1]
         player1ColorCode = self.matchingColor[player1ID][player2ID]
         player2ColorCode = 1 - player1ColorCode  # because we just have 2 color.
-        nextGame.update({'player1Colour': self.colorParser(player1ColorCode), 'player2Colour': player2ColorCode})
+        print(player2ColorCode, player1ColorCode)
+        nextGame.update({'player1Colour': self.colorParser(player1ColorCode), 'player2Colour': self.colorParser(player2ColorCode)})
         return nextGame
 
     def generateMatchColor(self):
@@ -261,6 +262,7 @@ class Tournament:
         sortedScores = self.generateSortedScores()
         # Generate data about next game
         nextGame = self.generateNextGameData()
+        print(nextGame)
         # Open a writable file
         with open(filePath, 'w+') as f:
             print(f'Opened {filePath}')
