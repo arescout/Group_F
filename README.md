@@ -1,6 +1,5 @@
 # GroupF
 Repository for Group F. Game server.
-This is a test.
 
 ## Conventions
 
@@ -21,3 +20,7 @@ GAMESCORE: The point difference between players. >0 -> FPLAYER is in lead, <0 ->
 GAMESPLAYED: Number of games played
 PLAYERSCORE: Follows by a player name and player score. Is printed in ascending order.
 NEXTPLAYERS: Follows by names of the next players and their color. Format -> "Player1:W Player2:B"
+
+## Endfile
+The endfile is sent out once all games has been played, indicating that the tournament is over.
+It only contains the ENDFILE keyword and the final scores.
