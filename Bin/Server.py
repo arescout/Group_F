@@ -84,8 +84,6 @@ class Server:
     def receiveFile(self, filePath, data):
         # Open or create a file at the given address
         with open(filePath, "wb") as f:
-            # Receive data from the socket
-            # bytesRead = clientSocket.recv(self.bufferSize)
             # Write the data to the file
             f.write(data)
         return True
@@ -99,14 +97,21 @@ class Server:
         return True
 
     def handleFile(self, filePath):
+        print('Handling file')
         with open(filePath, 'r+') as f:
-            if f.readline() == 'GAMEFILE':
+            firstLine = f.readline()
+            if 'GAMEFILE' in firstLine:
                 self.tournament.handleGameFile(filePath)
+                print(self.tournament.history)
                 for line in f.readlines():
                     line = line.split()
-                    if line[0].rstrip() == 'TPLAYER':
+                    if line[0].rstrip() == 'TPLAYER:':
                         self.sendFile(self.players[line[1].rstrip()], filePath)
-                        return f'Forwarded gamefile to {self.players[line[1].rstrip()]}'
+                        print(f'Forwarded gamefile to {line[1].rstrip()}')
+                        return
+            else:
+                print(f'Received unknown file type: {firstLine}')
+                return
         return
 
 

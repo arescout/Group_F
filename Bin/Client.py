@@ -43,14 +43,27 @@ class Client:
             f.write(data)
         return True
 
-    def sendFile(self, msg):
-        self.s.send(msg.encode("utf-8"))
-
     def sendFile(self, filePath):
         with open(filePath, 'rb') as f:
             content = f.read()
             self.s.send(content)
         return print(f'Sent {filePath}')
+
+    def handleFile(self, filePath):
+        with open(filePath, 'r+') as f:
+            firstLine = f.readline()
+            if 'GAMEFILE' in firstLine:
+                print('Received a gamefile!')
+                # Add functionality here.
+                return
+            elif 'TOURNAMENTFILE' in firstLine:
+                print('Received a tournamentfile!')
+                # Add functionality here.
+                return
+            else:
+                print(f'Received unknown file type: {firstLine}')
+            return
+
 
     def listeningThread(self):
         while True:
@@ -63,8 +76,9 @@ class Client:
                 break
                 # lock released on exit
 
-            filePath = str(time.localtime())+'.txt'
+            filePath = self.pname+str(time.localtime())+'.txt'
             self.receiveFile(filePath, data)
+            self.handleFile(filePath)
 
             #print_lock.release()
 
@@ -84,8 +98,9 @@ def main():
     #pname='Player1'
     client = Client(addr, port, pname)
     time.sleep(15)
-    print('sending')
-    client.s.send(f'From {pname}.'.encode('ascii'))
+    if client.pname =='Player1':
+        print('sending')
+        client.sendFile('testGameFile.txt')
     return
 
 

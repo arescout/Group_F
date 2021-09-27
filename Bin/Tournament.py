@@ -257,7 +257,6 @@ class Tournament:
 
     # Function for generating the tournament data file sent to the players
     def generateTournamentFile(self, filePath):
-        print('In Tournament')
         # Get the sorted scoreboard
         sortedScores = self.generateSortedScores()
         # Generate data about next game
@@ -265,6 +264,8 @@ class Tournament:
         # Open a writable file
         with open(filePath, 'w+') as f:
             print(f'Opened {filePath}')
+            # Add tournamentfile tag
+            f.write('TOURNAMENTFILE\n')
             # Add how many games has been played
             f.write(f'GAMESPLAYED: {self.gamesPlayed}\n')
             # Iterate over each player in the dict with sorted scores
@@ -285,29 +286,3 @@ class Tournament:
             f.write('\n')
         # Close the file and exit function
         return True
-
-
-def main():
-
-    ## plan the color order of games to make sure everyone gets to play both colors
-
-    ### prompt players to initiate game
-    tournament = Tournament()
-    tournament.addPlayer('Player1', 12344)
-    tournament.addPlayer('Player2', 1235)
-    tournament.addPlayer('Player3', 1236)
-    print(tournament.players)
-    tournament.generateTournamentFile('testTournamentFile.txt')
-    tournament.handleGameFile('testGameFile.txt')
-    tournament.handleGameFile('testGameFile0.txt')
-    print(tournament.scores)
-    print(tournament.history)
-    print(tournament.colours)
-    tournament.generateTournamentFile('testTournamentFile0.txt')
-    # store the results in the tournament data in local variable
-    # tournament_data += tournament
-    # send out tournamnet data
-
-
-if __name__ == '__main__':
-    main()
