@@ -98,9 +98,14 @@ def main():
     #pname='Player1'
     client = Client(addr, port, pname)
     time.sleep(15)
-    if client.pname =='Player1':
+    if client.pname =='p1':
         print('sending')
         client.sendFile('testGameFile.txt')
+    time.sleep(5)
+
+    if client.pname =='p2':
+        print('sending')
+        client.sendFile('testGameFile0.txt')
     return
 
 

@@ -110,6 +110,7 @@ class Tournament:
     def handleGameFile(self, filePath):
         # Extract the relevant content without altering the file
         fileContent = self.readGameFile(filePath)
+        print('Content: ', fileContent)
         # If game is still active, return false (no action required)
         if fileContent['gamedone'] != True:
             return False
