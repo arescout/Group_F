@@ -10,6 +10,8 @@ from Tournament import Tournament
 
 print_lock = threading.Lock()
 
+G_flag = True #Glaobal flag is for disabling the new players entry once tournament has started
+
 # Imports of internal packages
 
 class Server:
@@ -35,31 +37,34 @@ class Server:
         return
 
     def listenForConnections(self):
+        #Below Glaobal flag is for disabling the new players entry once tournament has started
+        global G_flag
+        while G_flag: 
         # Define how many unanswered connections the socket will allow to queue
-        self.s.listen(8)
-        print("socket is listening")
-        # Start listening to connections
-        # For now, this loop will continue until manually terminated
-        while True:
-            # Accept an incomming connection
+            self.s.listen(8)
+            print("socket is listening")
+            # Start listening to connections
+            # For now, this loop will continue until manually terminated
+            while True:
+                # Accept an incomming connection
 
-            clientSocket, address = self.s.accept()
-            if len(self.players) >= 8:
-                print('Game is full')
-                continue
-            # Print the address for logging purposes
-            name = clientSocket.recv(1024)
-            name = json.loads(name)
+                clientSocket, address = self.s.accept()
+                if len(self.players) >= 8:
+                    print('Game is full')
+                    continue
+                # Print the address for logging purposes
+                name = clientSocket.recv(1024)
+                name = json.loads(name)
 
-            self.tournament.addPlayer(name['name'], address, Server.connectedPlayer)
-            Server.connectedPlayer += 1
+                self.tournament.addPlayer(name['name'], address, Server.connectedPlayer)
+                Server.connectedPlayer += 1
 
-            self.players.update({name['name']:clientSocket})
-            # print_lock.acquire()
-            print('Connected to :', address[0], ':', address[1], ': player', name['name'])
+                self.players.update({name['name']:clientSocket})
+                # print_lock.acquire()
+                print('Connected to :', address[0], ':', address[1], ': player', name['name'])
 
-            connection = Connection(self, address[1], clientSocket)
-            self.connections.append(connection)
+                connection = Connection(self, address[1], clientSocket)
+                self.connections.append(connection)
         return
 
     def closeSocket(self):
@@ -94,6 +99,9 @@ class Server:
         for player in self.players.values():
             print(f'Sending to {player}')
             self.sendFile(player, filePath)
+        #Below Glaobal flag is for disabling the new players entry once tournament has started
+        global G_flag
+        G_flag = False
         return True
 
     def handleFile(self, filePath):
