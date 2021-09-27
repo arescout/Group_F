@@ -208,7 +208,9 @@ class Tournament:
             while player2 == player1:
                 player2 = random.choice(list(self.players.keys()))
             # Create dict
-            nextGame = {'player1': player1, 'player1Colour': 'B', 'player2': player2, 'player2Colour': "W"}
+            player1ColorCode, player2ColorCode = self.generateColorCode(player1, player2)
+            nextGame = {'player1': player1, 'player1Colour': self.colorParser(player1ColorCode),
+                        'player2': player2, 'player2Colour': self.colorParser(player2ColorCode)}
             # After this it won't be the first game
             self.firstGame = False
             # Return dict
@@ -216,13 +218,18 @@ class Tournament:
         # If  it's not the first game, generate a valid matchup
         nextGame = self.generateNextMatchup()
         # Generate placeholder colours
-        player1ID = self.players[nextGame['player1']][1]
-        player2ID = self.players[nextGame['player1']][1]
+        player1ColorCode, player2ColorCode = self.generateColorCode(nextGame['player1'], nextGame['player2'])
+        nextGame.update({'player1Colour': self.colorParser(player1ColorCode),
+                         'player2Colour': self.colorParser(player2ColorCode)})
+        return nextGame
+
+    def generateColorCode(self, player1Name, player2Name):
+        player1ID = player1Name
+        player2ID = player2Name
         player1ColorCode = self.matchingColor[player1ID][player2ID]
         player2ColorCode = 1 - player1ColorCode  # because we just have 2 color.
-        print(player2ColorCode, player1ColorCode)
-        nextGame.update({'player1Colour': self.colorParser(player1ColorCode), 'player2Colour': self.colorParser(player2ColorCode)})
-        return nextGame
+
+        return player1ColorCode, player2ColorCode
 
     def generateMatchColor(self):
         """
