@@ -10,9 +10,11 @@ import time
 print_lock = threading.Lock()
 
 # Class for handling everyting on the client side
-class Client():
-    def __init__(self,serverAddress, serverPort, pname):
+class Client:
+    def __init__(self, serverAddress, serverPort, pname):
+
         # Set how many bytes to accept from a socket
+        self.ID = 0
         self.bufferSize = 4096
         # Set playername in game
         self.pname = pname
@@ -22,16 +24,15 @@ class Client():
         # For now it's localhost per default
         self.s.connect((socket.gethostname(),serverPort))
         # Receive a file that is sent instantly from the server
-        #self.receiveFile(self.s,'testReceive.txt')
+        # self.receiveFile(self.s,'testReceive.txt')
         self.s.send(str.encode(json.dumps({'name': self.pname})))
 
-        #start_new_thread(self.threaded, (self.s, ))
+        # start_new_thread(self.threaded, (self.s, ))
 
         x = threading.Thread(target=self.listeningThread)
         x.start()
 
         return
-
 
     # Function for receiving a file from a socket
     # This function assumes that all data is sent in one transmission, ie the file isn't bigger than bufferSize
@@ -41,6 +42,7 @@ class Client():
             # Write the data to the file
             f.write(data)
         return True
+
     def sendFile(self, msg):
         self.s.send(msg.encode("utf-8"))
 
@@ -48,7 +50,7 @@ class Client():
         with open(filePath, 'rb') as f:
             content = f.read()
             self.s.send(content)
-        return(print(f'Sent {filePath}'))
+        return print(f'Sent {filePath}')
 
     def listeningThread(self):
         while True:
@@ -76,8 +78,8 @@ def main():
     #addr = str(input('Enter server address: '))
     #port = int(input('Enter server port: '))
     pname = str(input('Enter player name (without blankspaces): '))
-    addr='127.0.0.1'
-    port=2232
+    addr = '127.0.0.1'
+    port = 2232
 
     #pname='Player1'
     client = Client(addr, port, pname)
