@@ -56,7 +56,6 @@ class Server:
             addedPlayerName = self.tournament.addPlayer(name['name'], address, Server.connectedPlayer) # This is the name after a client being added
 
             if addedPlayerName is not False and addedPlayerName != name['name']:
-                print(name, addedPlayerName)
                 errFilePath = f'client_{address}_ErrorLog.txt'
                 # We know that the name has been taken. Now we need to inform the client
                 with open(errFilePath, 'w') as f:
@@ -65,16 +64,18 @@ class Server:
                     f.write(f'{name} already taken, new name is {addedPlayerName}')
                 self.sendFile(clientSocket, errFilePath)
                 os.remove(errFilePath)
-
+                name['name'] = addedPlayerName
 
             Server.connectedPlayer += 1
 
-            self.players.update({name['name']:clientSocket})
+            self.players.update({name['name']: clientSocket})
             # print_lock.acquire()
             print('Connected to :', address[0], ':', address[1], ': player', name['name'])
 
             connection = Connection(self, address[1], clientSocket)
             self.connections.append(connection)
+
+
         return
 
     def closeSocket(self):
@@ -150,15 +151,13 @@ class Connection:
             data = self.clientSocket.recv(1024)
             if not data:
                 return
-            #self.send(data.decode("utf-8"))
+            # self.send(data.decode("utf-8"))
             self.server.receiveFile(filePath, data)
             isGameDone = self.server.handleFile(filePath)
             if isGameDone:
                 isTournamentGoing = self.server.sendTournamentFile()
                 if not isTournamentGoing:
                     self.server.closeSocket()
-
-        return
 
     def sendThread(self):
         while True:
