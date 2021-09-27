@@ -66,6 +66,12 @@ class Client:
                     print(lines[2])
                     f.close()
                     os.remove(filePath)
+
+            elif 'ENDFILE' in firstLine:
+                print('Received endfile!')
+                self.closeClient()
+                # Add functionality here.
+
             else:
                 print(f'Received unknown file type: {lines[0]}')
             return
@@ -92,7 +98,6 @@ class Client:
 
     def closeClient(self):
         self.s.close()
-        print_lock.release()
 
 def main():
     #addr = str(input('Enter server address: '))
