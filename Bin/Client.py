@@ -60,6 +60,10 @@ class Client:
                 print('Received a tournamentfile!')
                 # Add functionality here.
                 return
+            elif 'ENDFILE' in firstLine:
+                print('Received endfile!')
+                self.closeClient()
+                # Add functionality here.
             else:
                 print(f'Received unknown file type: {firstLine}')
             return
@@ -86,7 +90,6 @@ class Client:
 
     def closeClient(self):
         self.s.close()
-        print_lock.release()
 
 def main():
     #addr = str(input('Enter server address: '))

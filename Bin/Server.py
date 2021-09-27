@@ -90,11 +90,13 @@ class Server:
 
     def sendTournamentFile(self):
         filePath = 'tournamentFile.txt'
-        self.tournament.generateTournamentFile(filePath)
+        isGoing = self.tournament.generateTournamentFile(filePath)
         for player in self.players.values():
             print(f'Sending to {player}')
             self.sendFile(player, filePath)
-        return True
+        if not isGoing:
+            return(False)
+        return(True)
 
     def handleFile(self, filePath):
         print('Handling file')
@@ -131,11 +133,16 @@ class Connection:
         filePath = 'tempFile.txt'
         while True:
             data = self.clientSocket.recv(1024)
+            if not data:
+                return
             #self.send(data.decode("utf-8"))
             self.server.receiveFile(filePath, data)
             isGameDone = self.server.handleFile(filePath)
             if isGameDone:
-                self.server.sendTournamentFile()
+                isTournamentGoing = self.server.sendTournamentFile()
+                if not isTournamentGoing:
+                    self.server.closeSocket()
+
         return
 
     def sendThread(self):
