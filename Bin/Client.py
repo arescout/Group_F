@@ -67,7 +67,7 @@ class Client:
                     f.close()
                     os.remove(filePath)
 
-            elif 'ENDFILE' in firstLine:
+            elif 'ENDFILE' in lines[0]:
                 print('Received endfile!')
                 self.closeClient()
                 # Add functionality here.
