@@ -106,7 +106,7 @@ class Tournament:
         # Return dict
         return content
 
-    # Function for handling content of a game file sent between active players
+    # Function for handling content of a game file sent between active
     def handleGameFile(self, filePath):
         # Extract the relevant content without altering the file
         fileContent = self.readGameFile(filePath)

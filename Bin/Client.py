@@ -1,6 +1,7 @@
 # File containing client classes
 # Imports of external packages
 import socket
+import os
 from _thread import *
 import threading
 import json
@@ -51,17 +52,22 @@ class Client:
 
     def handleFile(self, filePath):
         with open(filePath, 'r+') as f:
-            firstLine = f.readline()
-            if 'GAMEFILE' in firstLine:
+            lines = f.readlines()
+            if 'GAMEFILE' in lines[0]:
                 print('Received a gamefile!')
                 # Add functionality here.
                 return
-            elif 'TOURNAMENTFILE' in firstLine:
+            elif 'TOURNAMENTFILE' in lines[0]:
                 print('Received a tournamentfile!')
                 # Add functionality here.
                 return
+            elif 'ERROR_LOG' in lines[0]:
+                if 'DUPLICATE_NAME' in lines[1]:
+                    print(lines[2])
+                    f.close()
+                    os.remove(filePath)
             else:
-                print(f'Received unknown file type: {firstLine}')
+                print(f'Received unknown file type: {lines[0]}')
             return
 
 
@@ -92,6 +98,7 @@ def main():
     #addr = str(input('Enter server address: '))
     #port = int(input('Enter server port: '))
     pname = str(input('Enter player name (without blankspaces): '))
+    pname = pname.strip()
     addr = '127.0.0.1'
     port = 2232
 
