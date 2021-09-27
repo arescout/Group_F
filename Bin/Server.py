@@ -5,6 +5,7 @@ from _thread import *
 import threading
 import json
 import time
+import os
 
 from Tournament import Tournament
 
@@ -47,11 +48,25 @@ class Server:
             if len(self.players) >= 8:
                 print('Game is full')
                 continue
+
             # Print the address for logging purposes
             name = clientSocket.recv(1024)
-            name = json.loads(name)
+            name = json.loads(name)  # This is the received name
 
-            self.tournament.addPlayer(name['name'], address, Server.connectedPlayer)
+            addedPlayerName = self.tournament.addPlayer(name['name'], address, Server.connectedPlayer) # This is the name after a client being added
+
+            if addedPlayerName is not False and addedPlayerName != name['name']:
+                print(name, addedPlayerName)
+                errFilePath = f'client_{address}_ErrorLog.txt'
+                # We know that the name has been taken. Now we need to inform the client
+                with open(errFilePath, 'w') as f:
+                    f.write("ERROR_LOG\n")
+                    f.write("DUPLICATE_NAME\n")
+                    f.write(f'{name} already taken, new name is {addedPlayerName}')
+                self.sendFile(clientSocket, errFilePath)
+                os.remove(errFilePath)
+
+
             Server.connectedPlayer += 1
 
             self.players.update({name['name']:clientSocket})
