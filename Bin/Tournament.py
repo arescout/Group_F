@@ -224,8 +224,8 @@ class Tournament:
         return nextGame
 
     def generateColorCode(self, player1Name, player2Name):
-        player1ID = player1Name
-        player2ID = player2Name
+        player1ID = self.players[player1Name][1]
+        player2ID = self.players[player2Name][1]
         player1ColorCode = self.matchingColor[player1ID][player2ID]
         player2ColorCode = 1 - player1ColorCode  # because we just have 2 color.
 
