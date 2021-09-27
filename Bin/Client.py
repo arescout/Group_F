@@ -64,6 +64,8 @@ class Client:
             elif 'ERROR_LOG' in lines[0]:
                 if 'DUPLICATE_NAME' in lines[1]:
                     print(lines[2])
+                    content = lines[2].split()
+                    self.pname = content[-1]
                     f.close()
                     os.remove(filePath)
 
