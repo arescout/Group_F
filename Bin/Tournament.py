@@ -43,7 +43,7 @@ class Tournament:
     def addPlayer(self, playerName, playerAddress, playerID=0):
         # Check if player is new
         for address_ID in self.players.values():
-            if address_ID[0][1] == playerAddress:
+            if address_ID[0][1] == playerAddress[1]:
                 # if playerAddress in self.players.values():
                 print(playerAddress)
                 # If not, print for logging and return False
