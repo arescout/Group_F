@@ -5,6 +5,7 @@ from _thread import *
 import threading
 import json
 import time
+import os
 
 from Tournament import Tournament
 
@@ -46,25 +47,37 @@ class Server:
             # Start listening to connections
             # For now, this loop will continue until manually terminated
             while True:
-                # Accept an incomming connection
+                  # Accept an incomming connection
+              clientSocket, address = self.s.accept()
+              if len(self.players) >= 8:
+                  print('Game is full')
+                  continue
 
-                clientSocket, address = self.s.accept()
-                if len(self.players) >= 8:
-                    print('Game is full')
-                    continue
-                # Print the address for logging purposes
-                name = clientSocket.recv(1024)
-                name = json.loads(name)
+              # Print the address for logging purposes
+              name = clientSocket.recv(1024)
+              name = json.loads(name)  # This is the received name
 
-                self.tournament.addPlayer(name['name'], address, Server.connectedPlayer)
-                Server.connectedPlayer += 1
+              addedPlayerName = self.tournament.addPlayer(name['name'], address, Server.connectedPlayer) # This is the name after a client being added
 
-                self.players.update({name['name']:clientSocket})
-                # print_lock.acquire()
-                print('Connected to :', address[0], ':', address[1], ': player', name['name'])
+              if addedPlayerName is not False and addedPlayerName != name['name']:
+                  errFilePath = f'client_{address}_ErrorLog.txt'
+                  # We know that the name has been taken. Now we need to inform the client
+                  with open(errFilePath, 'w') as f:
+                      f.write("ERROR_LOG\n")
+                      f.write("DUPLICATE_NAME\n")
+                      f.write(f'{name} already taken, new name is {addedPlayerName}')
+                  self.sendFile(clientSocket, errFilePath)
+                  os.remove(errFilePath)
+                  name['name'] = addedPlayerName
 
-                connection = Connection(self, address[1], clientSocket)
-                self.connections.append(connection)
+              Server.connectedPlayer += 1
+
+              self.players.update({name['name']: clientSocket})
+              # print_lock.acquire()
+              print('Connected to :', address[0], ':', address[1], ': player', name['name'])
+
+              connection = Connection(self, address[1], clientSocket)
+              self.connections.append(connection)
         return
 
     def closeSocket(self):
@@ -95,14 +108,17 @@ class Server:
 
     def sendTournamentFile(self):
         filePath = 'tournamentFile.txt'
-        self.tournament.generateTournamentFile(filePath)
+        isGoing = self.tournament.generateTournamentFile(filePath)
         for player in self.players.values():
             print(f'Sending to {player}')
             self.sendFile(player, filePath)
         #Below Glaobal flag is for disabling the new players entry once tournament has started
         global G_flag
         G_flag = False
-        return True
+        if not isGoing:
+            return(False)
+        return(True)
+
 
     def handleFile(self, filePath):
         print('Handling file')
@@ -139,12 +155,15 @@ class Connection:
         filePath = 'tempFile.txt'
         while True:
             data = self.clientSocket.recv(1024)
-            #self.send(data.decode("utf-8"))
+            if not data:
+                return
+            # self.send(data.decode("utf-8"))
             self.server.receiveFile(filePath, data)
             isGameDone = self.server.handleFile(filePath)
             if isGameDone:
-                self.server.sendTournamentFile()
-        return
+                isTournamentGoing = self.server.sendTournamentFile()
+                if not isTournamentGoing:
+                    self.server.closeSocket()
 
     def sendThread(self):
         while True:

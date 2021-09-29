@@ -43,7 +43,7 @@ class Tournament:
     def addPlayer(self, playerName, playerAddress, playerID=0):
         # Check if player is new
         for address_ID in self.players.values():
-            if address_ID[0][1] == playerAddress:
+            if address_ID[0][1] == playerAddress[1]:
                 # if playerAddress in self.players.values():
                 print(playerAddress)
                 # If not, print for logging and return False
@@ -106,10 +106,11 @@ class Tournament:
         # Return dict
         return content
 
-    # Function for handling content of a game file sent between active players
+    # Function for handling content of a game file sent between active
     def handleGameFile(self, filePath):
         # Extract the relevant content without altering the file
         fileContent = self.readGameFile(filePath)
+        print('Content: ', fileContent)
         # If game is still active, return false (no action required)
         if fileContent['gamedone'] != True:
             return False
@@ -168,7 +169,7 @@ class Tournament:
             # Assume p1 is valid
             newP1 = False
             # Check if p1 has any new matchups
-            if len(self.matchups[p1]) >= len(self.players.items())-1:
+            if len(self.matchups[p1]) <= len(self.players.items())-1:
                 # If not, find a new p1
                 newP1 = True
 
@@ -192,7 +193,7 @@ class Tournament:
             if p2 in self.matchups[p1]:
                 newP2 = True
             # Check if p2 has any matchups left
-            if len(self.matchups[p2]) >= len(self.players.items())-1:
+            if len(self.matchups[p2]) <= len(self.players.items())-1:
                 newP2 = True
         return {'player1': p1, 'player2': p2}
 
@@ -217,11 +218,22 @@ class Tournament:
             return nextGame
         # If  it's not the first game, generate a valid matchup
         nextGame = self.generateNextMatchup()
+        if nextGame == False:
+            return(False)
         # Generate placeholder colours
         player1ColorCode, player2ColorCode = self.generateColorCode(nextGame['player1'], nextGame['player2'])
         nextGame.update({'player1Colour': self.colorParser(player1ColorCode),
                          'player2Colour': self.colorParser(player2ColorCode)})
         return nextGame
+
+    def generateFinalFile(self, filePath):
+        with open(filePath, 'w+') as f:
+            f.write('ENDFILE\n')
+            sortedScores = self.generateSortedScores()
+            for player, score in sortedScores.items():
+                # Add them in order to the file, one line per player
+                f.write(f'PLAYERSCORE: {player} {score}\n')
+        return(True)
 
     def generateColorCode(self, player1Name, player2Name):
         player1ID = self.players[player1Name][1]
@@ -270,6 +282,9 @@ class Tournament:
         # Generate data about next game
         nextGame = self.generateNextGameData()
         print(nextGame)
+        if nextGame == False:
+            self.generateFinalFile(filePath)
+            return(False)
         # Open a writable file
         with open(filePath, 'w+') as f:
             print(f'Opened {filePath}')
