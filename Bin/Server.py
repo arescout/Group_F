@@ -105,8 +105,14 @@ class Server:
         return True
 
     def sendTournamentFile(self):
-        filePath = 'tournamentFile.txt'
+        filePath = 'tournamentFile.json'
         isGoing = self.tournament.generateTournamentFile(filePath)
+        #Converts JSON file into JSON object
+        f = open(filePath, )
+        data = json.load(f)
+        print("hejheghasdsad")
+        print(data)
+        
         for player in self.players.values():
             print(f'Sending to {player}')
             self.sendFile(player, filePath)
@@ -164,14 +170,13 @@ class Connection:
             time.sleep(0.01)
             while len(self.sendQueue) != 0:
                 self.clientSocket.send(self.sendQueue.pop(0))
-                #self.clientSocket.send(f"Hallo {self.port}".encode("utf-8"))
-            #print_lock.release()
 
     def send(self, msg):
         self.sendQueue.append(msg.encode("utf-8"))
 
     def onMsg(self, msg):
         print(msg.decode("utf-8"))
+
 
 
 def main():
@@ -196,6 +201,8 @@ def main():
             server.tournament.generateMatchColor()  # this is to predefine color of player for each match
             print(server.tournament.matchingColor)
             server.sendTournamentFile()
+            server.tournament.handleGameFile("testGameFile.json")
+            #server.tournament.handleGameFile("testGameFile.txt")
             break
         elif act == 'ref':
             continue
