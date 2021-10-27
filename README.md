@@ -1,10 +1,19 @@
 # GroupF
-Repository for Group F. Game server.
+This repository contains the necessary classes and functions for hosting a server and running a tournament of a general game. The server handles sending relevant game files, keeping track of matchups with player colours and keeping track of tournament scores.
+
+The server sends out tournament files at the beginning and end of each game. It sends out an endfile once the last game is done. It reads and passes on gamefiles between each round in a game.
+
+## Hosting
+To host a server, initiate the Server class with port specified. If the server isn't to be hosted on localhost, change the address-variable in the class constructor.
+
+To host a client/player, initiate the Client class with port specified. If the client isn't to be hosted the same address as the server, change the address-variable in the class constructor.
+
+Both classes has functions distinguishing between the files sent and received. Where applicable to the communication platform, further functionality based on said files is included as well.
 
 ## Conventions
 
 ### Players
-- Player names can't contain blankspaces
+- Player names can't contain blankspaces.
 
 ## Game file key words:
 Game files are files sent between two active players. The file should consist of all relevant game state data AND the following key word-value pairs:
