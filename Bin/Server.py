@@ -56,7 +56,6 @@ class Server:
             addedPlayerName = self.tournament.addPlayer(name['name'], address, Server.connectedPlayer) # This is the name after a client being added
 
             if addedPlayerName is not False and addedPlayerName != name['name']:
-                print(name, addedPlayerName)
                 errFilePath = f'client_{address}_ErrorLog.txt'
                 # We know that the name has been taken. Now we need to inform the client
                 with open(errFilePath, 'w') as f:
@@ -65,16 +64,18 @@ class Server:
                     f.write(f'{name} already taken, new name is {addedPlayerName}')
                 self.sendFile(clientSocket, errFilePath)
                 os.remove(errFilePath)
-
+                name['name'] = addedPlayerName
 
             Server.connectedPlayer += 1
 
-            self.players.update({name['name']:clientSocket})
+            self.players.update({name['name']: clientSocket})
             # print_lock.acquire()
             print('Connected to :', address[0], ':', address[1], ': player', name['name'])
 
             connection = Connection(self, address[1], clientSocket)
             self.connections.append(connection)
+
+
         return
 
     def closeSocket(self):
@@ -104,8 +105,14 @@ class Server:
         return True
 
     def sendTournamentFile(self):
-        filePath = 'tournamentFile.txt'
+        filePath = 'tournamentFile.json'
         isGoing = self.tournament.generateTournamentFile(filePath)
+        #Converts JSON file into JSON object
+        f = open(filePath, )
+        data = json.load(f)
+        print("hejheghasdsad")
+        print(data)
+        
         for player in self.players.values():
             print(f'Sending to {player}')
             self.sendFile(player, filePath)
@@ -150,7 +157,7 @@ class Connection:
             data = self.clientSocket.recv(1024)
             if not data:
                 return
-            #self.send(data.decode("utf-8"))
+            # self.send(data.decode("utf-8"))
             self.server.receiveFile(filePath, data)
             isGameDone = self.server.handleFile(filePath)
             if isGameDone:
@@ -158,21 +165,18 @@ class Connection:
                 if not isTournamentGoing:
                     self.server.closeSocket()
 
-        return
-
     def sendThread(self):
         while True:
             time.sleep(0.01)
             while len(self.sendQueue) != 0:
                 self.clientSocket.send(self.sendQueue.pop(0))
-                #self.clientSocket.send(f"Hallo {self.port}".encode("utf-8"))
-            #print_lock.release()
 
     def send(self, msg):
         self.sendQueue.append(msg.encode("utf-8"))
 
     def onMsg(self, msg):
         print(msg.decode("utf-8"))
+
 
 
 def main():
@@ -197,6 +201,8 @@ def main():
             server.tournament.generateMatchColor()  # this is to predefine color of player for each match
             print(server.tournament.matchingColor)
             server.sendTournamentFile()
+            server.tournament.handleGameFile("testGameFile.json")
+            #server.tournament.handleGameFile("testGameFile.txt")
             break
         elif act == 'ref':
             continue
